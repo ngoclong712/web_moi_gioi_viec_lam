@@ -9,4 +9,6 @@ class Company extends Model
 {
     /** @use HasFactory<\Database\Factories\CompanyFactory> */
     use HasFactory;
+
+    public $timestamps = false;
 }

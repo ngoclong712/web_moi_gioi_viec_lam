@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Log In | Hyper - Responsive Bootstrap 4 Admin Dashboard</title>
+    <title>Register | Hyper - Responsive Bootstrap 4 Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="A fully featured admin theme which can be used to build CRM, CMS, etc." name="description" />
     <meta content="Coderthemes" name="author" />
@@ -12,6 +12,7 @@
     <link rel="shortcut icon" href="assets/images/favicon.ico">
 
     <!-- App css -->
+
     <link href="{{ asset('css/icons.min.css')  }}" rel="stylesheet" type="text/css">
     <link href="{{ asset('css/app-creative.min.css')  }}" rel="stylesheet" type="text/css">
     <link href="{{ asset('css/app-creative-dark.min.css')  }}" rel="stylesheet" type="text/css">
@@ -27,50 +28,55 @@
             <div class="card-body">
 
                 <!-- title-->
-                <h4 class="mt-0">Sign In</h4>
-                <p class="text-muted mb-4">Enter your email address and password to access account.</p>
+                <h4 class="mt-0">Free Sign Up</h4>
+                <p class="text-muted mb-4">Don't have an account? Create your account, it takes less than a minute</p>
 
                 <!-- form -->
-                <form action="#">
+                <form action="{{ route('registering') }}" method="post">
+                    @csrf
+                    @auth()
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input class="form-control" type="text" disabled value="{{ auth()->user()->name }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Email address</label>
+                        <input class="form-control" type="email" disabled value="{{ auth()->user()->email }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Avatar</label>
+                        <img src="{{ auth()->user()->avatar }}" width="32px" class="rounded-circle">
+                    </div>
+                    @endauth
+                    @guest()
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input class="form-control" type="text" id="name" placeholder="Enter your name" required name="name">
+                    </div>
                     <div class="form-group">
                         <label for="emailaddress">Email address</label>
-                        <input class="form-control" type="email" id="emailaddress" required="" placeholder="Enter your email">
+                        <input class="form-control" type="email" id="emailaddress" required placeholder="Enter your email" name="email">
+                    </div>
+                    @endguest
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input class="form-control" type="password" required id="password" placeholder="Enter your password" name="password">
                     </div>
                     <div class="form-group">
-                        <a href="pages-recoverpw-2.html" class="text-muted float-right"><small>Forgot your password?</small></a>
-                        <label for="password">Password</label>
-                        <input class="form-control" type="password" required="" id="password" placeholder="Enter your password">
-                    </div>
-                    <div class="form-group mb-3">
                         <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="checkbox-signin">
-                            <label class="custom-control-label" for="checkbox-signin">Remember me</label>
+                            <input type="checkbox" class="custom-control-input" id="checkbox-signup">
+                            <label class="custom-control-label" for="checkbox-signup">I accept <a href="javascript: void(0);" class="text-muted">Terms and Conditions</a></label>
                         </div>
                     </div>
                     <div class="form-group mb-0 text-center">
-                        <button class="btn btn-primary btn-block" type="submit"><i class="mdi mdi-login"></i> Log In </button>
-                    </div>
-                    <!-- social-->
-                    <div class="text-center mt-4">
-                        <p class="text-muted font-16">Sign in with</p>
-                        <ul class="social-list list-inline mt-3">
-                            <li class="list-inline-item">
-                                <a href="{{ route('auth.redirect', 'github') }}" class="social-list-item border-primary text-primary"><i class="mdi mdi-github-circle"></i></a>
-                            </li>
-                            <li class="list-inline-item">
-                                <a href="javascript: void(0);" class="social-list-item border-danger text-danger"><i class="mdi mdi-gitlab"></i></a>
-                            </li>
-                            <li class="list-inline-item">
-                                <a href="javascript: void(0);" class="social-list-item border-info text-info"><i class="mdi mdi-linkedin"></i></a>
-                            </li>
-                        </ul>
+                        <button class="btn btn-primary btn-block" type="submit"><i class="mdi mdi-account-circle"></i> Sign Up </button>
                     </div>
                 </form>
                 <!-- end form-->
 
                 <!-- Footer-->
                 <footer class="footer footer-alt">
-                    <p class="text-muted">Don't have an account? <a href="pages-register-2.html" class="text-muted ml-1"><b>Sign Up</b></a></p>
+                    <p class="text-muted">Already have account? <a href="pages-login-2.html" class="text-muted ml-1"><b>Log In</b></a></p>
                 </footer>
 
             </div> <!-- end .card-body -->

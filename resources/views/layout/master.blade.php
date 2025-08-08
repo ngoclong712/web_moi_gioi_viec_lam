@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>{{ $title }} - {{ config('app.name') }}</title>
+    <title>{{ ($title) ?? ''}} - {{ config('app.name') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="A fully featured admin theme which can be used to build CRM, CMS, etc." name="description">
     <meta content="Coderthemes" name="author">
@@ -40,7 +40,7 @@
                     <div class="col-12">
                         <div class="page-title-box">
                             <h4 class="page-title">
-                                {{ $title }}
+                                {{ $title ?? ''}}
                             </h4>
                         </div>
                     </div>
@@ -68,6 +68,6 @@
 <!-- bundle -->
 <script src="{{ asset('js/vendor.min.js') }}"></script>
 <script src="{{ asset('js/app.min.js') }}"></script>
-
+@stack('js')
 </body>
 </html>

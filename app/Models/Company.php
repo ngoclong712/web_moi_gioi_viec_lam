@@ -10,5 +10,19 @@ class Company extends Model
     /** @use HasFactory<\Database\Factories\CompanyFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        "id",
+        "name",
+        "address",
+        "address2",
+        "district",
+        "city",
+        "country",
+        "zipcode",
+        "phone",
+        "email",
+        "logo",
+        "deleted_at"
+    ];
     public $timestamps = false;
 }

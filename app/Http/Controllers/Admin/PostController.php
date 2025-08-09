@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Imports\PostsImport;
 use App\Models\Company;
 use App\Models\Post;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PostController extends Controller
 {
@@ -32,8 +35,9 @@ class PostController extends Controller
         return view('admin.posts.index');
     }
 
-    public function importCsv()
+    public function importCsv(Request $request)
     {
-        return 1;
+//        return 1;
+        Excel::import(new PostsImport,  $request->file('file'));
     }
 }

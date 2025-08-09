@@ -51,11 +51,18 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     }
                 });
+                var formData = new FormData();
+                formData.append('file', $(this)[0].files[0]);
                 $.ajax({
                     url: '{{ route('admin.posts.import_csv') }}',
                     type: 'POST',
                     dataType: 'json',
-                    data: {file: $(this).val()},
+                    enctype: 'multipart/form-data',
+                    data: formData,
+                    async: false,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
                     success: function(response){
                         $.toast({
                             heading: 'Import Success',

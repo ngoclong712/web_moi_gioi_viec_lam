@@ -15,7 +15,16 @@ class PostController extends Controller
 
     public function index()
     {
-        return $this->model->paginate();
+        $data =  $this->model->paginate();
+        foreach($data as $each){
+            $each->currency_salary = $each->currency_salary_code;
+            $each->status = $each->status_name;
+        }
 
+        return response()->json([
+            'data' => $data->getCollection(),
+            'success' => true,
+            'pagination' => $data->linkCollection(),
+        ]);
     }
 }

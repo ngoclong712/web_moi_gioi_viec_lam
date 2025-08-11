@@ -11,6 +11,10 @@
                         Import CSV
                     </label>
                     <input type="file" name="csv" id="csv" class="d-none" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+                    <nav class="float-right">
+                        <ul class="pagination pagination-rounded mb-0" id="pagination">
+                        </ul>
+                    </nav>
                 </div>
                 <div class="card-body">
                     <table class="table-striped table" id="table-data">
@@ -40,11 +44,48 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            {{--$.ajax({--}}
-            {{--    url: '{{ route('api.posts') }}',--}}
-            {{--    dataType: 'json',--}}
-            {{--    data: {param1: 'value1'},--}}
-            {{--})--}}
+            //crawl data
+            $.ajax({
+                url: '{{ route('api.posts') }}',
+                dataType: 'json',
+                data: {page: {{ request()->get('page') ?? 1 }} },
+                success: function(response){
+                    response.data.forEach(function(each) {
+                        let location = each.district + ' -' + each.city;
+                        let remotable = each.remotable ? 'x' : '';
+                        let is_partime = each.is_partime ? 'x' : '';
+                        let is_pinned = each.is_pinned ? 'x' : '';
+                        let range_salary = (each.min_salary && each.max_salary) ? each.min_salary + '-' + each.max_salary : '';
+                        let date_range = (each.start_date && each.end_date) ? each.start_date + '-' + each.end_date : '';
+                        let created_at = convertDateToDateTime(each.created_at);
+                        $('#table-data').append($('<tr>')
+                            .append($('<td>').append(each.id))
+                            .append($('<td>').append(each.job_title))
+                            .append($('<td>').append(location))
+                            .append($('<td>').append(remotable))
+                            .append($('<td>').append(is_partime))
+                            .append($('<td>').append(range_salary))
+                            .append($('<td>').append(date_range))
+                            .append($('<td>').append(each.status))
+                            .append($('<td>').append(is_pinned))
+                            .append($('<td>').append(created_at))
+                        );
+                    });
+                    renderPagination(response.pagination);
+                },
+                error: function(response) {
+
+                },
+            })
+
+            $(document).on('click', '#pagination > li > a', function(event) {
+               event.preventDefault();
+               let page = $(this).text();
+                console.log(page)
+               let urlParams = new URLSearchParams(window.location.search);
+               urlParams.set('page', page);
+               window.location.search = urlParams;
+            });
             $("#csv").change(function(event) {
                 $.ajaxSetup({
                     headers: {

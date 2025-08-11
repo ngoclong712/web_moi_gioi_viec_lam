@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
+    use ResponseTrait;
     private object $model;
     public function __construct()
     {
@@ -21,10 +22,11 @@ class PostController extends Controller
             $each->status = $each->status_name;
         }
 
-        return response()->json([
-            'data' => $data->getCollection(),
-            'success' => true,
-            'pagination' => $data->linkCollection(),
-        ]);
+//        return $this->errorResponse('Import fail');
+
+        $arr['data'] = $data->getCollection();
+        $arr['pagination'] = $data->linkCollection();
+
+        return $this->successResponse($arr);
     }
 }

@@ -1,13 +1,19 @@
 @extends('layout.master')
 @push('css')
 {{--    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />--}}
+    <style>
+        .error {
+            color: red;
+        }
+    </style>
 @endpush
 @section('content')
     <div class="row">
         <div class="col-12">
             <div class="card">
+                    <div id="div-error" class="alert alert-danger d-none"></div>
                 <div class="card-body">
-                    <form action="{{ route('admin.posts.store') }}" method="post">
+                    <form action="{{ route('admin.posts.store') }}" method="post" id="form-create">
                         @csrf
                         <div class="form-group">
                             <label>Company</label>
@@ -16,7 +22,7 @@
                         </div>
                         <div class="form-group">
                             <label>Language (*)</label>
-                            <select class="form-control" multiple name="language" id="select-language">
+                            <select class="form-control" multiple name="language[]" id="select-language">
                             </select>
                         </div>
                         <div class="form-row">
@@ -82,7 +88,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <button class="btn btn-success" id="btn-submit" disabled>Create</button>
+                            <button class="btn btn-success" id="btn-submit">Create</button>
                         </div>
                     </form>
                 </div>
@@ -92,6 +98,7 @@
 @endsection
 @push('js')
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.js"></script>
     <script>
         function generateTitle(){
             const languages = $('#select-language option:selected').map(function(){
@@ -99,7 +106,7 @@
             }).get().join(',');
             const city = $('#select-city').val();
             const company = $('#select-company').val();
-            console.log(company);
+            // console.log(company);
 
             let title = `(${city})`;
             if (languages) {
@@ -132,7 +139,7 @@
             const response = await fetch('{{ asset('locations/') }}' + path)
             const districts = await response.json();
             $.each(districts.district, function(index,each){
-                console.log(index,each);
+                // console.log(index,each);
                 if(each.pre === 'Quận' || each.pre === 'Huyện') {
                     $('#select-district').append(`
                     <option>
@@ -221,6 +228,35 @@
                     }
                 });
             })
+
+            $("#form-create").validate({
+                rules: {
+                    company: "required",
+                },
+                submitHandler: function(form) {
+                    $.ajax({
+                        url: $(form).attr('action'),
+                        type: 'POST',
+                        dataType: 'json',
+                        data: $(form).serialize(),
+                        success: function(response){
+                            $("#div-error").hide();
+                        },
+                        error: function(response){
+                            const error = Object.values(response.responseJSON.errors);
+                            let string = '<ul>';
+                            error.forEach(function(each){
+                               each.forEach(function(error){
+                                   string += `<li>${error}</li>`;
+                               });
+                            });
+                            string += '</ul>';
+                            $("#div-error").html(string);
+                            $('#div-error').removeClass("d-none").show();
+                        }
+                    });
+                }
+            });
         });
     </script>
 @endpush

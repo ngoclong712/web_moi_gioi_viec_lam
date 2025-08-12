@@ -46,4 +46,6 @@ class Post extends Model
     {
         return PostStatusEnum::getKey($this->status);
     }
+
+
 }

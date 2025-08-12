@@ -7,26 +7,82 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <form>
+                    <form action="{{ route('admin.posts.store') }}" method="post">
+                        @csrf
                         <div class="form-group">
                             <label>Company</label>
                             <select class="form-control" name="company" id="select-company">
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Language</label>
+                            <label>Language (*)</label>
                             <select class="form-control" multiple name="language" id="select-language">
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label>City</label>
-                            <select class="form-control" name="city" id="select-city">
-                            </select>
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label>City (*)</label>
+                                <select class="form-control" name="city" id="select-city">
+                                </select>
+                            </div>
+                            <div class="form-group col-6">
+                                <label>District</label>
+                                <select class="form-control" name="district" id="select-district">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-4">
+                                <label>Min Salary</label>
+                                <input type="number" name="min_salary" class="form-control">
+                            </div>
+                            <div class="form-group col-4">
+                                <label>Max Salary</label>
+                                <input type="number" name="max_salary" class="form-control">
+                            </div>
+                            <div class="form-group col-4">
+                                <label>Currency</label>
+                                <select name="currency_salary" class="form-control">
+                                    @foreach($currencies as $key=> $value)
+                                        <option value="{{ $value }}">
+                                            {{ $key }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label>Requirement</label>
+                                <textarea name="requirement" class="form-control"></textarea>
+                            </div>
+                            <div class="form-group col-6">
+                                <label>Number Of Applicants</label>
+                                <input type="number" name="number_applicants" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label>Start Date</label>
+                                <input type="date" name="start_date" class="form-control">
+                            </div>
+                            <div class="form-group col-6">
+                                <label>End Date</label>
+                                <input type="date" name="end_data" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label>Title</label>
+                                <input type="text" name="title" class="form-control" id="title">
+                            </div>
+                            <div class="form-group col-6">
+                                <label>Slug</label>
+                                <input type="text" name="slug" class="form-control" id="slug">
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label>District</label>
-                            <select class="form-control" name="district" id="select-district">
-                            </select>
+                            <button class="btn btn-success" id="btn-submit" disabled>Create</button>
                         </div>
                     </form>
                 </div>
@@ -37,6 +93,39 @@
 @push('js')
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
+        function generateTitle(){
+            const languages = $('#select-language option:selected').map(function(){
+                return $(this).text();
+            }).get().join(',');
+            const city = $('#select-city').val();
+            const company = $('#select-company').val();
+            console.log(company);
+
+            let title = `(${city})`;
+            if (languages) {
+                title += ` ${languages}`;
+            }
+            if (company) {
+                title += languages ? ` - ${company}` : ` ${company}`;
+            }
+            $('#title').val(title)
+            generateSlug(title);
+        }
+        function generateSlug(title){
+            $.ajax({
+                url: '{{ route('api.posts.slug.generate') }}',
+                type: 'POST',
+                dataType: 'json',
+                data: { title },
+                success: function(response){
+                    $('#slug').val(response.data);
+                    $('#slug').trigger('change');
+                },
+                error: function(response){
+
+                }
+            });
+        }
         async function loadDistrict(){
             $('#select-district').empty();
             const path = $('#select-city option:selected').data('path');
@@ -44,7 +133,7 @@
             const districts = await response.json();
             $.each(districts.district, function(index,each){
                 console.log(index,each);
-                if(each.pre === 'Quận') {
+                if(each.pre === 'Quận' || each.pre === 'Huyện') {
                     $('#select-district').append(`
                     <option>
                     ${each.name}
@@ -66,6 +155,7 @@
                 loadDistrict();
             })
             $("#select-district").select2();
+            loadDistrict();
             $("#select-company").select2({
               tags: true,
                 ajax: {
@@ -82,7 +172,7 @@
                             results: $.map(data.data, function (item) {
                                 return {
                                     text: item.name,
-                                    id: item.id
+                                    id: item.name
                                 }
                             })
                         };
@@ -111,6 +201,26 @@
                     },
                 }
             });
+            $(document).on('change', '#select-company, #select-city, #select-language', function() {
+                generateTitle();
+            })
+            $('#slug').change(function() {
+                $('#btn-submit').attr('disabled', true);
+                $.ajax({
+                    url: '{{ route('api.posts.slug.check') }}',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { slug: $(this).val() },
+                    success: function(response){
+                        if(response.success) {
+                            $('#btn-submit').attr('disabled', false);
+                        }
+                    },
+                    error: function(response){
+
+                    }
+                });
+            })
         });
     </script>
 @endpush

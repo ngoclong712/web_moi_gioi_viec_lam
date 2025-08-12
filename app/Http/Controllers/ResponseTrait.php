@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 trait ResponseTrait
 {
-    public function successResponse($data, $message = '')
+    public function successResponse($data = [], $message = '')
     {
         return response()->json([
             'success' => true,

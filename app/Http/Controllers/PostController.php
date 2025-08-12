@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Post\CheckSlugRequest;
+use App\Http\Requests\Post\GenerateSlugRequest;
 use App\Models\Post;
+use Cviebrock\EloquentSluggable\Services\SlugService;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -28,5 +31,21 @@ class PostController extends Controller
         $arr['pagination'] = $data->linkCollection();
 
         return $this->successResponse($arr);
+    }
+
+    public function generateSlug(GenerateSlugRequest $request)
+    {
+        try {
+            $title = $request->get('title');
+            $slug = SlugService::createSlug(Post::class, 'slug', $title);
+            return $this->successResponse($slug);
+        }
+        catch (\Throwable $th) {
+            return $this->errorResponse();
+        }
+    }
+    public function checkSlug(CheckSlugRequest $request)
+    {
+        return $this->successResponse();
     }
 }

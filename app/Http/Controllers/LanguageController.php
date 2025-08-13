@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Language;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class LanguageController extends Controller
 {
@@ -17,9 +18,13 @@ class LanguageController extends Controller
 
     public function index(Request $request)
     {
-        $data = $this->model
-            ->where('name', 'like', '%'.$request->get('q').'%')
-            ->get();
+        $configs = SystemConfigController::getAndCache();
+        $data = $configs['languages'];
+        if ($request->get('q') != null) {
+            $data = $configs['languages']->filter(function ($each) use ($request) {
+                return Str::contains(strtolower($each['name']), $request->get('q'));
+            });
+        };
 
         return $this->successResponse($data);
     }

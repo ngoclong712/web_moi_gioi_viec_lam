@@ -1,6 +1,6 @@
 @extends('layout.master')
 @push('css')
-{{--    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />--}}
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.css" rel="stylesheet">
     <style>
         .error {
             color: red;
@@ -13,7 +13,7 @@
             <div class="card">
                     <div id="div-error" class="alert alert-danger d-none"></div>
                 <div class="card-body">
-                    <form action="{{ route('admin.posts.store') }}" method="post" id="form-create">
+                    <form action="{{ route('admin.posts.store') }}" method="post" id="form-create-post">
                         @csrf
                         <div class="form-group">
                             <label>Company</label>
@@ -58,11 +58,11 @@
                             </div>
                         </div>
                         <div class="form-row">
-                            <div class="form-group col-6">
+                            <div class="form-group col-8">
                                 <label>Requirement</label>
-                                <textarea name="requirement" class="form-control"></textarea>
+                                <textarea id="text-requirement" name="requirement"></textarea>
                             </div>
-                            <div class="form-group col-6">
+                            <div class="form-group col-4">
                                 <label>Number Of Applicants</label>
                                 <input type="number" name="number_applicants" class="form-control">
                             </div>
@@ -96,18 +96,38 @@
         </div>
     </div>
     <div id="modal-company" class="modal fade" role="dialog">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">Create Company</h4>
                     <button type="button" class="close float-right" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ route('admin.companies.store') }}" method="post">
+                    <form id="form-create-company" action="{{ route('admin.companies.store') }}" method="post" enctype="multipart/form-data">
                         @csrf
                         <div class="form-group">
                             <label>Company</label>
-                            <input readonly name="company" id="company" class="form-control">
+                            <input readonly name="name" id="company" class="form-control">
+                        </div>
+                        <div class="form-row select-location">
+                            <div class="form-group">
+                                <label>Country (*)</label>
+                                <select class="form-control" name="country" id="country">
+                                    @foreach($countries as $value => $name)
+                                        <option value="{{ $value }}">
+                                            {{ $name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group col-4">
+                                <label>City (*)</label>
+                                <select name="city" class="form-control select-city" id="city"></select>
+                            </div>
+                            <div class="form-group col-4">
+                                <label>District</label>
+                                <select name="district" class="form-control select-district" id="district"></select>
+                            </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-6">
@@ -119,20 +139,31 @@
                                 <input type="text" name="address2" class="form-control">
                             </div>
                         </div>
-                        <div class="form-row select-location">
+                        <div class="form-row">
                             <div class="form-group col-6">
-                                <label>City</label>
-                                <select name="city" class="form-control" id="city"></select>
+                                <label>Zipcode</label>
+                                <input type="number" name="zipcode" class="form-control">
                             </div>
                             <div class="form-group col-6">
-                                <label>District</label>
-                                <select name="district" class="form-control select-district" id="district"></select>
+                                <label>Phone</label>
+                                <input type="number" name="phone" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label>Email</label>
+                                <input type="email" name="email" class="form-control">
+                            </div>
+                            <div class="form-group col-6">
+                                <label>Logo</label>
+                                <input name="logo" type="file" oninput="pic.src=window.URL.createObjectURL(this.files[0])">
+                                <img id="pic" height="100">
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" data-dismiss="modal">Create</button>
+                    <button type="button" onclick="submitForm('company')" class="btn btn-success">Create</button>
                 </div>
             </div>
 
@@ -142,6 +173,7 @@
 @push('js')
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.js"></script>
     <script>
         function generateTitle(){
             const languages = $('#select-language option:selected').map(function(){
@@ -178,7 +210,10 @@
         }
         async function loadDistrict(parent){
             parent.find(".select-district").empty()
-            const path = parent.find('option:selected').data('path');
+            const path = parent.find('.select-city option:selected').data('path');
+            if(!path){
+                return;
+            }
             const response = await fetch('{{ asset('locations/') }}' + path)
             const districts = await response.json();
             let string = '';
@@ -202,7 +237,7 @@
                 dataType: 'json',
                 success: function(response){
                     if(response.data){
-                        submitForm();
+                        submitForm('post');
                     }
                     else {
                         $('#modal-company').modal("show");
@@ -215,12 +250,18 @@
                 }
             });
         }
-        function submitForm(){
+        function submitForm(type){
+            const object = $('#form-create-'+type)
+            const formData = new FormData(object[0]);
             $.ajax({
-                url: $('#form-create').attr('action'),
+                url: object.attr('action'),
                 type: 'POST',
                 dataType: 'json',
-                data: $('#form-create').serialize(),
+                data: formData,
+                processData: false,
+                contentType: false,
+                async: false,
+                cache: false,
                 success: function(){
                     $("#div-error").hide();
                 },
@@ -239,8 +280,9 @@
             });
         }
         $(document).ready(async function() {
-            $("#select-city").select2();
-            $("#city").select2();
+            $('#text-requirement').summernote();
+            $("#select-city").select2({tags: true});
+            $("#city").select2({tags: true});
             const response = await fetch('{{ asset('locations/index.json') }}')
             const cities = await response.json();
             $.each(cities, function(index,each){
@@ -256,8 +298,8 @@
             $("#select-city, #city").change(function () {
                 loadDistrict($(this).parents('.select-location'));
             })
-            $('#select-district').select2();
-            $('#district').select2();
+            $('#select-district').select2({tags: true});
+            $('#district').select2({tags: true});
             await loadDistrict($('#select-city').parents('.select-location'));
             $("#select-company").select2({
               tags: true,
@@ -325,7 +367,7 @@
                 });
             })
 
-            $("#form-create").validate({
+            $("#form-create-post").validate({
                 rules: {
                     company: "required",
                 },

@@ -10,6 +10,7 @@ use App\Models\Language;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 
 class TestController extends Controller
@@ -28,6 +29,6 @@ class TestController extends Controller
 
     public function test()
     {
-
+        return DB::getSchemaBuilder()->getColumnListing('posts');
     }
 }

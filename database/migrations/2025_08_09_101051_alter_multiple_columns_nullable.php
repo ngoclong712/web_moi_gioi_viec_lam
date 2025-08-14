@@ -17,11 +17,9 @@ return new class extends Migration
             }
             if (Schema::hasColumn('posts', 'remote')) {
                 $table->string('remote')->nullable()->change();
-                $table->renameColumn('remote', 'remotable');
             }
             if (Schema::hasColumn('posts', 'is_parttime')) {
                 $table->string('is_parttime')->nullable()->change();
-                $table->renameColumn('is_parttime', 'is_partime');
             }
             if (Schema::hasColumn('posts', 'min_salary')) {
                 $table->string('min_salary')->nullable()->change();
@@ -30,7 +28,7 @@ return new class extends Migration
                 $table->string('max_salary')->nullable()->change();
             }
             if (Schema::hasColumn('posts', 'currency_salary')) {
-                $table->string('currency_salary')->nullable()->change();
+                $table->string('currency_salary')->default(1)->change();
             }
         });
         Schema::table('companies', function (Blueprint $table) {

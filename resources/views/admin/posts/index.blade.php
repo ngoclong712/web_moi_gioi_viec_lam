@@ -51,7 +51,7 @@
                 data: {page: {{ request()->get('page') ?? 1 }} },
                 success: function(response){
                     response.data.data.forEach(function(each) {
-                        let location = each.district + ' -' + each.city;
+                        let location = each.district + ' - ' + each.city;
                         let remotable = each.remotable ? 'x' : '';
                         let is_partime = each.is_partime ? 'x' : '';
                         let is_pinned = each.is_pinned ? 'x' : '';
@@ -120,7 +120,7 @@
                         })
                     },
                     error: function(response) {
-
+                        notifyError('Loi');
                     },
                 });
             });

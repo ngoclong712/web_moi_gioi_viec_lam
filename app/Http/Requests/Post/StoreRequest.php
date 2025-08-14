@@ -29,7 +29,7 @@ class StoreRequest extends FormRequest
                 'nullable',
                 'string',
             ],
-            'language' => [
+            'languages' => [
                 'required',
                 'array',
                 'filled',
@@ -53,17 +53,22 @@ class StoreRequest extends FormRequest
                 'numeric',
                 'min:1',
             ],
+            'remotables' => [
+                'required',
+                'array',
+            ],
+            'is_parttime' => [
+                'nullable',
+            ],
             'start_date' => [
                 'nullable',
                 'date',
-                'before:end_date',
             ],
             'end_date' => [
                 'nullable',
                 'date',
-                'after:start_date',
             ],
-            'title' => [
+            'job_title' => [
                 'required',
                 'string',
                 'filled',

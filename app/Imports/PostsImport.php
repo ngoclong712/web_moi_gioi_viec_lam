@@ -39,8 +39,6 @@ class PostsImport implements ToArray, WithHeadingRow
                     $companyId = null;
                 }
 
-
-
                 $post = Post::create([
                     'job_title' => $language,
                     'company_id' => $companyId,
@@ -63,7 +61,7 @@ class PostsImport implements ToArray, WithHeadingRow
             }
         }
         catch(\Throwable $e){
-            dd($each);
+            dd($e);
         }
     }
 }

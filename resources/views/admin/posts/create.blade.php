@@ -5,6 +5,14 @@
         .error {
             color: red;
         }
+        input[data-switch]+label {
+            width: 115px;
+        }
+        input[data-switch]:checked+label:after
+        {
+            left: 91px
+        ;
+        }
     </style>
 @endpush
 @section('content')
@@ -22,13 +30,13 @@
                         </div>
                         <div class="form-group">
                             <label>Language (*)</label>
-                            <select class="form-control" multiple name="language[]" id="select-language">
+                            <select class="form-control" multiple name="languages[]" id="select-language">
                             </select>
                         </div>
                         <div class="form-row select-location">
                             <div class="form-group col-6">
                                 <label>City (*)</label>
-                                <select class="form-control" name="city" id="select-city">
+                                <select class="form-control select-city" name="city" id="select-city">
                                 </select>
                             </div>
                             <div class="form-group col-6">
@@ -65,6 +73,14 @@
                             <div class="form-group col-4">
                                 <label>Number Of Applicants</label>
                                 <input type="number" name="number_applicants" class="form-control">
+                                <br>
+                                <input type="checkbox" id="remote" name="remotables[remote]" checked data-switch="success">
+                                <label for="remote" data-on-label="Can Remote" data-off-label="No Remote"></label>
+                                <input type="checkbox" id="office" name="remotables[office]" checked data-switch="success">
+                                <label for="office" data-on-label="Office" data-off-label="No Office"></label>
+                                <br>
+                                <input type="checkbox" id="can_parttime" name="can_parttime" checked data-switch="info">
+                                <label for="can_parttime" data-on-label="Can Part Time" data-off-label="No Part Time"></label>
                             </div>
                         </div>
                         <div class="form-row">
@@ -74,13 +90,13 @@
                             </div>
                             <div class="form-group col-6">
                                 <label>End Date</label>
-                                <input type="date" name="end_data" class="form-control">
+                                <input type="date" name="end_date" class="form-control">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-6">
                                 <label>Title</label>
-                                <input type="text" name="title" class="form-control" id="title">
+                                <input type="text" name="job_title" class="form-control" id="title">
                             </div>
                             <div class="form-group col-6">
                                 <label>Slug</label>
@@ -250,6 +266,25 @@
                 }
             });
         }
+
+        function showError(errors){
+            let string = '<ul>';
+            if(Array.isArray(errors)) {
+                errors.forEach(function(each){
+                    each.forEach(function(error){
+                        string += `<li>${error}</li>`;
+                    });
+                });
+            }
+            else {
+                string += `<li>${errors}</li>`;
+            }
+            string += '</ul>';
+            $("#div-error").html(string);
+            $('#div-error').removeClass("d-none").show();
+            notifyError(string);
+        }
+
         function submitForm(type){
             const object = $('#form-create-'+type)
             const formData = new FormData(object[0]);
@@ -262,20 +297,28 @@
                 contentType: false,
                 async: false,
                 cache: false,
-                success: function(){
-                    $("#div-error").hide();
+                enctype: 'multipart/form-data',
+                success: function(response){
+                    if(response.success) {
+                        $("#div-error").hide();
+                        $("#modal-company").modal("hide");
+                        notifySuccess();
+{{--                        window.location.href = '{{ route('admin.posts.index') }}';--}}
+                    }
+                    else {
+                        showError(response.message);
+                    }
                 },
                 error: function(response){
-                    const error = Object.values(response.responseJSON.errors);
-                    let string = '<ul>';
-                    error.forEach(function(each){
-                        each.forEach(function(error){
-                            string += `<li>${error}</li>`;
-                        });
-                    });
-                    string += '</ul>';
-                    $("#div-error").html(string);
-                    $('#div-error').removeClass("d-none").show();
+                    let errors;
+                    if(response.responseJSON.errors) {
+                        errors = Object.values(response.responseJSON.errors);
+                        showError(errors);
+                    }
+                    else {
+                        errors = response.responseJSON.message;
+                        showError(errors);
+                    }
                 }
             });
         }

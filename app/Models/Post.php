@@ -7,6 +7,7 @@ use App\Enums\PostStatusEnum;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Post extends Model
 {
@@ -59,5 +60,16 @@ class Post extends Model
         return PostStatusEnum::getKey($this->status);
     }
 
-
+    public function languages(): MorphToMany
+    {
+        return $this->morphToMany(
+            Language::class,
+            'object',
+            ObjectLanguage::class,
+            'object_id',
+            'language_id',
+            'id',
+            'id',
+        );    // Lấy thêm cột type nếu cần
+    }
 }

@@ -53,7 +53,7 @@
                     response.data.data.forEach(function(each) {
                         let location = each.district + ' - ' + each.city;
                         let remotable = each.remotable ? 'x' : '';
-                        let is_partime = each.is_partime ? 'x' : '';
+                        let is_partime = each.can_parttime ? 'x' : '';
                         let is_pinned = each.is_pinned ? 'x' : '';
                         let range_salary = (each.min_salary && each.max_salary) ? each.min_salary + '-' + each.max_salary : '';
                         let date_range = (each.start_date && each.end_date) ? each.start_date + '-' + each.end_date : '';

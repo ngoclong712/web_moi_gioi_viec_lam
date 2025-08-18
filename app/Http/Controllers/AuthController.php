@@ -37,13 +37,14 @@ class AuthController extends Controller
 
         $user->name = $data->getName();
         $user->avatar = $data->getAvatar();
+        $user->role = UserRoleEnum::ADMIN;
         $user->save();
+
+        $role = getRoleByKey($user->role);
 
         Auth::login($user);
 
         if($checkExist){
-            $role = strtolower(UserRoleEnum::getKey($user->role));
-//            dd("$role.welcome");
             return redirect()->route("$role.welcome");
         }
         return redirect()->route('register');
@@ -53,7 +54,7 @@ class AuthController extends Controller
     {
         $password = Hash::make($request->get('password'));
         $role = $request->get('role');
-
+        $roleKey = getRoleByKey((int)$role);
         if(auth()->check()){
             User::query()->where('id', auth()->user()->id)
                 ->update([
@@ -71,6 +72,8 @@ class AuthController extends Controller
 
             Auth::login($user);
         }
+
+        return redirect()->route("$roleKey.welcome");
     }
 
     public function logout(Request $request)

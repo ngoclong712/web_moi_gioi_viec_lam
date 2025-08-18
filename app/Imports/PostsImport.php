@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Enums\FileTypeEnum;
+use App\Enums\PostRemotableEnum;
 use App\Enums\PostStatusEnum;
 use App\Models\Company;
 use App\Models\File;
@@ -22,16 +23,30 @@ class PostsImport implements ToArray, WithHeadingRow
     {
         try{
             foreach ($array as $each) {
+                $remotable = PostRemotableEnum::OFFICE_ONLY;
                 $companyName = $each['cong_ty'];
                 $language = $each['ngon_ngu'];
                 $city = $each['dia_diem'];
+                if($city === 'Nhiều') {
+                    $city = null;
+                } else if ($city === 'Remote') {
+                    $remotable = PostRemotableEnum::REMOTE_ONLY;
+                    $city = null;
+                } else {
+                    $city = str_replace([
+                        'HN',
+                        'HCM',
+                    ], [
+                        'Hà Nội',
+                        'Hồ Chí Minh',
+                    ], $city);
+                }
                 $link = $each['link'];
 
                 if(!empty($companyName)) {
                     $companyId = Company::query()->firstOrCreate([
                         'name' => $companyName,
                     ],[
-                        'city' => $city,
                         'country' => 'Vietnam'
                     ])->id;
                 }
@@ -44,12 +59,13 @@ class PostsImport implements ToArray, WithHeadingRow
                     'company_id' => $companyId,
                     'city' => $city,
                     'status' => PostStatusEnum::ADMIN_APPROVED,
+                    'remotable' => $remotable,
                 ]);
 
                 $languages = explode(',', $language);
-                foreach ($languages as $each) {
+                foreach ($languages as $language) {
                     Language::query()->firstOrCreate([
-                        'name' => trim($each),
+                        'name' => trim($language),
                     ]);
                 }
 

@@ -29,6 +29,14 @@ class TestController extends Controller
 
     public function test()
     {
-        return DB::getSchemaBuilder()->getColumnListing('posts');
+//        return DB::getSchemaBuilder()->getColumnListing('posts');
+        $city = 'HN, Đà Nẵng, HCM';
+        return str_replace([
+            'HN',
+            'HCM',
+        ], [
+            'Hà Nội',
+            'Hồ Chí Minh',
+        ], $city);
     }
 }

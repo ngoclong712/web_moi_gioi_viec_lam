@@ -92,7 +92,7 @@ class PostController extends Controller
                 ObjectLanguage::create([
                     'language_id' => $language,
                     'object_id' => $post->id,
-                    'type' => ObjectLanguageTypeEnum::POST,
+                    'object_type' => "App\Models\Post",
                 ]);
             }
 

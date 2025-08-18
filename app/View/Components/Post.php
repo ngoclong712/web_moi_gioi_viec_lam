@@ -11,13 +11,15 @@ class Post extends Component
     /**
      * Create a new component instance.
      */
-    public string $title;
+    public object $post;
     public string $languages;
+    public object $company;
 
     public function __construct($post)
     {
-        $this->title = $post->job_title;
+        $this->post = $post;
         $this->languages = implode(", ", ($post->languages->pluck('name')->toArray()));
+        $this->company = $post->company;
     }
 
     /**

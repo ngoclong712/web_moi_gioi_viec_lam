@@ -60,6 +60,16 @@ class Post extends Model
         return PostStatusEnum::getKey($this->status);
     }
 
+    public function getLocationAttribute()
+    {
+        if(!empty($this->district)){
+            return $this->district . ' - ' . $this->city;
+        }
+        else {
+            return $this->city;
+        }
+    }
+
     public function languages(): MorphToMany
     {
         return $this->morphToMany(
@@ -71,5 +81,10 @@ class Post extends Model
             'id',
             'id',
         );    // Lấy thêm cột type nếu cần
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
     }
 }

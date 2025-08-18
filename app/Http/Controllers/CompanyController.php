@@ -38,6 +38,7 @@ class CompanyController extends Controller
     {
         try {
             $arr = $request->validated();
+//            dd($arr);
             $arr['logo'] = optional($request->file('logo'))->store('company_logo');
 
             Company::create($arr);

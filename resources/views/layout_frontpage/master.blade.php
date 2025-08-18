@@ -27,17 +27,15 @@
 
     <div class="section">
         <div class="container">
-            <h2 class="section-title">Find what you need</h2>
+            <h2 class="section-title">
+                {{ __('frontpage.title') }}
+            </h2>
             <div class="row">
                 @include('layout_frontpage.sidebar')
 
                 <div class="col-md-9">
-                    <div class="row">
-                        @yield('content')
-                    </div>
-                    <div class="col-md-3" style="float: right">
-                        <button rel="tooltip" class="btn btn-rose btn-round" data-original-title="" title="">Load more...</button>
-                    </div>
+                    @yield('content')
+
                 </div>
             </div>
         </div>
@@ -49,7 +47,7 @@
 
 
 @include('layout_frontpage.footer')
-
+{{--@include('layout_frontpage.float-menu')--}}
 
 
 <script src="{{ asset('js/jquery.min.js') }}" type="text/javascript"></script>

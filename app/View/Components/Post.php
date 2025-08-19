@@ -13,7 +13,7 @@ class Post extends Component
      */
     public object $post;
     public string $languages;
-    public object $company;
+    public ?object $company;
 
     public function __construct($post)
     {

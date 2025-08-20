@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Applicant;
 
 use App\Enums\SystemCacheKeyEnum;
 use App\Http\Controllers\Controller;
+use App\Models\Config;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -17,6 +18,9 @@ class HomePageController extends Controller
         $searchCities = $request->get('cities') ?? [];
 
         $arrCity = getAndCachePostCities();
+        $configs = Config::getAndCache(0);
+        $minSalary = $request->get('min_salary', $configs['filter_min_salary']);
+        $maxSalary = $request->get('max_salary', $configs['filter_max_salary']);
 
         $query = Post::query()
             ->with([
@@ -46,6 +50,9 @@ class HomePageController extends Controller
             'posts' => $posts,
             'arrCity' => $arrCity,
             'searchCities' => $searchCities,
+            'minSalary' => $minSalary,
+            'maxSalary' => $maxSalary,
+            'configs' => $configs,
         ]);
     }
 }

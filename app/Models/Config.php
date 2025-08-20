@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SystemCacheKeyEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,4 +10,24 @@ class Config extends Model
 {
     /** @use HasFactory<\Database\Factories\ConfigFactory> */
     use HasFactory;
+
+    public static function getAndCache($isPublic)
+    {
+        return cache()->remember(
+            SystemCacheKeyEnum::CONFIGS . $isPublic,
+            86400 * 30,
+            function () use ($isPublic) {
+                $data = self::query()
+                    ->where('is_public', $isPublic)
+                    ->get();
+
+                $arr = [];
+                foreach ($data as $item) {
+                    $arr[$item->key] = $item->value;
+                }
+
+                return $arr;
+            }
+        );
+    }
 }

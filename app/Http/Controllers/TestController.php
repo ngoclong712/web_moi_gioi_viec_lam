@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\FileTypeEnum;
+use App\Enums\PostCurrencySalaryEnum;
 use App\Enums\PostStatusEnum;
 use App\Models\Company;
 use App\Models\File;
@@ -12,11 +13,13 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
+use NumberFormatter;
 
 class TestController extends Controller
 {
     private string $table;
     private object $model;
+
     public function __construct()
     {
         $this->model = User::query();
@@ -30,13 +33,7 @@ class TestController extends Controller
     public function test()
     {
 //        return DB::getSchemaBuilder()->getColumnListing('posts');
-        $city = 'HN, Đà Nẵng, HCM';
-        return str_replace([
-            'HN',
-            'HCM',
-        ], [
-            'Hà Nội',
-            'Hồ Chí Minh',
-        ], $city);
+
+        return 800/0.86;
     }
 }

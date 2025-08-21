@@ -44,6 +44,21 @@ class HomePageController extends Controller
                 return $q;
             });
         }
+
+        if($request->has('min_salary')) {
+            $query->where(function ($q) use ($minSalary) {
+                $q->orWhere('min_salary', '>=', $minSalary);
+                $q->orWhereNull('min_salary');
+            });
+        }
+
+        if($request->has('max_salary')) {
+            $query->where(function ($q) use ($maxSalary) {
+                $q->orWhere('max_salary', '<=', $maxSalary);
+                $q->orWhereNull('max_salary');
+            });
+        }
+
         $posts = $query->paginate();
         $posts->appends(['cities' => $searchCities]);
         return view('applicant.index', [

@@ -9,6 +9,7 @@ use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use NumberFormatter;
 
 class Post extends Model
 {
@@ -64,9 +65,27 @@ class Post extends Model
         ];
     }
 
+    public function languages(): MorphToMany
+    {
+        return $this->morphToMany(
+            Language::class,
+            'object',
+            ObjectLanguage::class,
+            'object_id',
+            'language_id',
+            'id',
+            'id',
+        );    // Lấy thêm cột type nếu cần
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
     public function getCurrencySalaryCodeAttribute()
     {
-       return PostCurrencySalaryEnum::getKey($this->currency_salary);
+        return PostCurrencySalaryEnum::getKey($this->currency_salary);
     }
 
     public function getStatusNameAttribute()
@@ -84,21 +103,39 @@ class Post extends Model
         }
     }
 
-    public function languages(): MorphToMany
+    public function getSalaryAttribute(): string
     {
-        return $this->morphToMany(
-            Language::class,
-            'object',
-            ObjectLanguage::class,
-            'object_id',
-            'language_id',
-            'id',
-            'id',
-        );    // Lấy thêm cột type nếu cần
-    }
+        $value = $this->currency_salary;
+        $key = PostCurrencySalaryEnum::getKey($value);
+        $locale = PostCurrencySalaryEnum::getLocaleByValue($value);
 
-    public function company()
-    {
-        return $this->belongsTo(Company::class);
+        $format = new NumberFormatter($locale, NumberFormatter::CURRENCY);
+        $rate = Config::getByKey($key);
+
+        if(!is_null($this->min_salary)) {
+            $salary = $this->min_salary * $rate;
+            $min_salary = $format->formatCurrency($salary, $key);
+        }
+        if(!is_null($this->max_salary)) {
+            $salary = $this->max_salary * $rate;
+            $max_salary = $format->formatCurrency($salary, $key);
+        }
+
+        if(!empty($min_salary)) {
+            if(!empty($max_salary)) {
+                return $min_salary . ' - ' . $max_salary;
+            }
+            else {
+                return __('frontpage.from_salary') . ' ' . $min_salary;
+            }
+        }
+        else {
+            if(!empty($max_salary)) {
+                return __('frontpage.up_to_salary') . ' ' . $max_salary;
+            }
+            else {
+                return "";
+            }
+        }
     }
 }

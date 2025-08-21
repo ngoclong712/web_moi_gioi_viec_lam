@@ -30,4 +30,17 @@ class Config extends Model
             }
         );
     }
+
+    public static function getByKey($key)
+    {
+        return cache()->remember(
+            SystemCacheKeyEnum::CONFIGS . $key,
+            86400 * 30,
+            function () use ($key) {
+                return self::query()
+                    ->where('key', $key)
+                    ->value('value');
+            }
+        );
+    }
 }

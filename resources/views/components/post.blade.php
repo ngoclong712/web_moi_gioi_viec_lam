@@ -22,6 +22,9 @@
                                 <span>{{ $company->name }}</span>
                             </a>
                         </div>
+                        <div>
+                            {{ $post->salary }}
+                        </div>
                     </div>
                 </div>
             </div>

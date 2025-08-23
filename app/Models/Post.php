@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use App\Enums\PostCurrencySalaryEnum;
+use App\Enums\PostRemotableEnum;
 use App\Enums\PostStatusEnum;
 use App\Enums\SystemCacheKeyEnum;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use NumberFormatter;
 
@@ -83,6 +86,11 @@ class Post extends Model
         return $this->belongsTo(Company::class);
     }
 
+    public function file(): HasOne
+    {
+        return $this->hasOne(File::class);
+    }
+
     public function getCurrencySalaryCodeAttribute()
     {
         return PostCurrencySalaryEnum::getKey($this->currency_salary);
@@ -93,10 +101,23 @@ class Post extends Model
         return PostStatusEnum::getKey($this->status);
     }
 
+    public function getRemotableNameAttribute()
+    {
+        $key = PostRemotableEnum::getKey($this->remotable);
+        $arr = explode('_', $key);
+        $str = '';
+        foreach($arr as $item) {
+            $str .= ucfirst(strtolower($item));
+            $str .= ' ';
+        }
+        return trim($str);
+
+    }
+
     public function getLocationAttribute(): ?string
     {
         if(!empty($this->district)){
-            return $this->district . ' - ' . $this->city;
+            return $this->district . ', ' . $this->city;
         }
         else {
             return $this->city;

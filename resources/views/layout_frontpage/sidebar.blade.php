@@ -5,9 +5,10 @@
             <form>
                 <h4 class="card-title">
                     Refine
-                    <button class="btn btn-default btn-fab btn-fab-mini btn-simple pull-right" rel="tooltip" title="" data-original-title="Reset Filter">
+                    <a href="{{ route('applicant.index') }}"
+                        class="btn btn-default btn-fab btn-fab-mini btn-simple pull-right" rel="tooltip" title="" data-original-title="Reset Filter">
                         <i class="material-icons">cached</i>
-                    </button>
+                    </a>
                 </h4>
                 <div class="panel panel-default panel-rose">
                     <div class="panel-heading" role="tab" id="headingOne">

@@ -39,3 +39,15 @@ if(!function_exists('getPostCities')) {
         );
     }
 }
+if(!function_exists('isSuperAdmin')) {
+    function isSuperAdmin()
+    {
+        return auth()->check() && auth()->user()->role == UserRoleEnum::SUPER_ADMIN;
+    }
+}
+if(!function_exists('isAdmin')) {
+    function isAdmin()
+    {
+        return auth()->check() && auth()->user()->role == UserRoleEnum::ADMIN;
+    }
+}

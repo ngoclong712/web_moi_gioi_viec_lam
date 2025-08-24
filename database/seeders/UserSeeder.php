@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
         $arr = [];
         $faker = Faker::create();
         $companies = Company::query()->pluck('id')->toArray();
-        for ($i = 0; $i < 10000; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $arr[] = [
                 'name' => $faker->firstName(). " ". $faker->lastName(),
                 'avatar' => $faker->imageUrl(),

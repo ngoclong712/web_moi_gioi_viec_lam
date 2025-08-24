@@ -14,4 +14,18 @@ final class PostRemotableEnum extends Enum
     public const REMOTE_ONLY = 1;
     public const OFFICE_ONLY = 2;
     public const HYBRID = 3;
+
+    public static function getRemotableArray()
+    {
+        $data = self::asArray();
+
+        $arr = ['all' => 0];
+
+        foreach ($data as $key => $value) {
+            $index = strtolower($key);
+            $arr[$index] = $value;
+        }
+
+        return $arr;
+    }
 }

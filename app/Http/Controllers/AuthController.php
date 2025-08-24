@@ -19,7 +19,10 @@ class AuthController extends Controller
 
     public function register()
     {
-        return view('auth.register');
+        $roles = UserRoleEnum::getRolesForRegister();
+        return view('auth.register', [
+            'roles' => $roles
+        ]);
     }
 
     public function callback($provider)
@@ -32,19 +35,18 @@ class AuthController extends Controller
         if(is_null($user)){
             $user = new User();
             $user->email = $data->getEmail();
+            $user->role= UserRoleEnum::APPLICANT;
             $checkExist = false;
         }
 
         $user->name = $data->getName();
         $user->avatar = $data->getAvatar();
-        $user->role = UserRoleEnum::ADMIN;
         $user->save();
-
-        $role = getRoleByKey($user->role);
 
         Auth::login($user);
 
         if($checkExist){
+            $role = getRoleByKey((int)$user->role);
             return redirect()->route("$role.welcome");
         }
         return redirect()->route('register');
@@ -55,6 +57,7 @@ class AuthController extends Controller
         $password = Hash::make($request->get('password'));
         $role = $request->get('role');
         $roleKey = getRoleByKey((int)$role);
+
         if(auth()->check()){
             User::query()->where('id', auth()->user()->id)
                 ->update([

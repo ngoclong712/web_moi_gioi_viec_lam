@@ -14,6 +14,67 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use NumberFormatter;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int|null $company_id
+ * @property string $job_title
+ * @property string|null $district
+ * @property string|null $city
+ * @property int|null $remotable
+ * @property int|null $can_parttime
+ * @property float|null $min_salary
+ * @property float|null $max_salary
+ * @property int $currency_salary
+ * @property string|null $requirement
+ * @property string|null $start_date
+ * @property string|null $end_date
+ * @property int|null $number_applicants
+ * @property int $status
+ * @property int $is_pinned
+ * @property string $slug
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $deleted_at
+ * @property-read \App\Models\Company|null $company
+ * @property-read \App\Models\File|null $file
+ * @property-read mixed $currency_salary_code
+ * @property-read string|null $location
+ * @property-read mixed $remotable_name
+ * @property-read string $salary
+ * @property-read mixed $status_name
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Language> $languages
+ * @property-read int|null $languages_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post approved()
+ * @method static \Database\Factories\PostFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post findSimilarSlugs(string $attribute, array $config, string $slug)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereCanParttime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereCompanyId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereCurrencySalary($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereDistrict($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereEndDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereIsPinned($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereJobTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereMaxSalary($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereMinSalary($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereNumberApplicants($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereRemotable($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereRequirement($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereStartDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post whereUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post withUniqueSlugConstraints(\Illuminate\Database\Eloquent\Model $model, string $attribute, array $config, string $slug)
+ * @mixin \Eloquent
+ */
 class Post extends Model
 {
     /** @use HasFactory<\Database\Factories\PostFactory> */
@@ -39,11 +100,15 @@ class Post extends Model
         "slug",
     ];
 
+    protected $casts = [
+        'start_date' => 'date:Y-m-d',
+        'end_date' => 'date:Y-m-d',
+    ];
     protected static function booted()
     {
         static::creating(static function ($object) {
            $object->user_id = auth()->user()->id;
-           $object->status = 1;
+           $object->status = PostStatusEnum::getByRole();
         });
         static::saved(static function ($object) {
            $city = $object->city;
@@ -158,5 +223,24 @@ class Post extends Model
                 return "";
             }
         }
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', PostStatusEnum::ADMIN_APPROVED);
+    }
+
+    public function getIsNotOpenAttribute()
+    {
+        if($this->start_date == null || $this->end_date == null){
+            return false;
+        }
+        $today = date('Y-m-d');
+        $start_date = $this->start_date->format('Y-m-d');
+        $end_date = $this->end_date->format('Y-m-d');
+        if($today >= $end_date || $today <= $start_date) {
+            return true;
+        }
+        return false;
     }
 }

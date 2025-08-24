@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Applicant;
 
+use App\Enums\PostRemotableEnum;
+use App\Enums\PostStatusEnum;
 use App\Enums\SystemCacheKeyEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Config;
@@ -21,6 +23,7 @@ class HomePageController extends Controller
         $configs = Config::getAndCache(0);
         $minSalary = $request->get('min_salary', $configs['filter_min_salary']);
         $maxSalary = $request->get('max_salary', $configs['filter_max_salary']);
+        $can_remote = $request->get('can_remote');
 
         $query = Post::query()
             ->with([
@@ -33,7 +36,9 @@ class HomePageController extends Controller
                     ]);
                 }
             ])
-            ->latest();
+            ->approved()
+            ->orderByDesc('is_pinned')
+            ->orderByDesc('id');
 
         if(!empty($searchCities)) {
             $query->where(function ($q) use ($searchCities) {
@@ -59,8 +64,16 @@ class HomePageController extends Controller
             });
         }
 
+        $remotable = $request->get('remotable');
+        if(!empty($remotable)) {
+            $query->where('remotable', $remotable);
+        }
+
         $posts = $query->paginate();
         $posts->appends(['cities' => $searchCities]);
+
+        $filterRemotable = PostRemotableEnum::getRemotableArray();
+
         return view('applicant.index', [
             'posts' => $posts,
             'arrCity' => $arrCity,
@@ -68,6 +81,8 @@ class HomePageController extends Controller
             'minSalary' => $minSalary,
             'maxSalary' => $maxSalary,
             'configs' => $configs,
+            'filterRemotable' => $filterRemotable,
+            'remotable' => $remotable,
         ]);
     }
 
@@ -75,7 +90,8 @@ class HomePageController extends Controller
     {
         $post = Post::query()
             ->with(['file'])
-            ->find($postId);
+            ->approved()
+            ->findOrFail($postId);
 
         return view('applicant.show', [
             'post' => $post,

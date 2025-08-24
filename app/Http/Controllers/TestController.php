@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\FileTypeEnum;
 use App\Enums\PostCurrencySalaryEnum;
 use App\Enums\PostStatusEnum;
+use App\Enums\UserRoleEnum;
 use App\Models\Company;
 use App\Models\File;
 use App\Models\Language;
@@ -34,6 +35,6 @@ class TestController extends Controller
     {
 //        return DB::getSchemaBuilder()->getColumnListing('posts');
 
-        return 800/0.86;
+        return user();
     }
 }

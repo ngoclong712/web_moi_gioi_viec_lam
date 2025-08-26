@@ -11,15 +11,16 @@ use BenSampo\Enum\Enum;
  */
 final class PostRemotableEnum extends Enum
 {
-    public const REMOTE_ONLY = 1;
+    public const ALL = 0;
     public const OFFICE_ONLY = 2;
     public const HYBRID = 3;
+    public const REMOTE_ONLY = 1;
+
 
     public static function getRemotableArray()
     {
+        $arr = [];
         $data = self::asArray();
-
-        $arr = ['all' => 0];
 
         foreach ($data as $key => $value) {
             $index = strtolower($key);
@@ -27,5 +28,11 @@ final class PostRemotableEnum extends Enum
         }
 
         return $arr;
+    }
+    public static function getArrayWithoutAll()
+    {
+        $data = self::asArray();
+        array_shift($data);
+        return $data;
     }
 }

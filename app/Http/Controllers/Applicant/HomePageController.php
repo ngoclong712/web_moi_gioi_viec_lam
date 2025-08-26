@@ -6,6 +6,7 @@ use App\Enums\PostRemotableEnum;
 use App\Enums\PostStatusEnum;
 use App\Enums\SystemCacheKeyEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Applicant\Homepage\IndexRequest;
 use App\Models\Config;
 use App\Models\Post;
 use App\Models\User;
@@ -15,63 +16,34 @@ use Illuminate\Support\Facades\View;
 
 class HomePageController extends Controller
 {
-    public function index(Request $request)
+    public function index(IndexRequest $request)
     {
         $searchCities = $request->get('cities') ?? [];
-
-        $arrCity = getAndCachePostCities();
         $configs = Config::getAndCache(0);
         $minSalary = $request->get('min_salary', $configs['filter_min_salary']);
         $maxSalary = $request->get('max_salary', $configs['filter_max_salary']);
-        $can_remote = $request->get('can_remote');
-
-        $query = Post::query()
-            ->with([
-                'languages',
-                'company' => function ($q) {
-                    return $q->select([
-                        'id',
-                        'name',
-                        'logo'
-                    ]);
-                }
-            ])
-            ->approved()
-            ->orderByDesc('is_pinned')
-            ->orderByDesc('id');
-
-        if(!empty($searchCities)) {
-            $query->where(function ($q) use ($searchCities) {
-                foreach ($searchCities as $searchCity) {
-                    $q->orWhere('city', 'like', '%' . $searchCity . '%');
-                }
-                $q->orWhereNull('city');
-                return $q;
-            });
-        }
-
-        if($request->has('min_salary')) {
-            $query->where(function ($q) use ($minSalary) {
-                $q->orWhere('min_salary', '>=', $minSalary);
-                $q->orWhereNull('min_salary');
-            });
-        }
-
-        if($request->has('max_salary')) {
-            $query->where(function ($q) use ($maxSalary) {
-                $q->orWhere('max_salary', '<=', $maxSalary);
-                $q->orWhereNull('max_salary');
-            });
-        }
-
         $remotable = $request->get('remotable');
+
+        $filters[] = [];
+        if(!empty($searchCities)) {
+            $filters['cities'] = $searchCities;
+        }
+        if($request->has('min_salary')) {
+            $filters['min_salary'] = $minSalary;
+        }
+        if($request->has('max_salary')) {
+            $filters['max_salary'] = $maxSalary;
+        }
         if(!empty($remotable)) {
-            $query->where('remotable', $remotable);
+            $filters['remotable'] = $remotable;
         }
 
-        $posts = $query->paginate();
-        $posts->appends(['cities' => $searchCities]);
+        $posts = Post::query()
+            ->indexHomepage($filters)
+            ->paginate()
+            ->appends(['cities' => $searchCities]);
 
+        $arrCity = getAndCachePostCities();
         $filterRemotable = PostRemotableEnum::getRemotableArray();
 
         return view('applicant.index', [

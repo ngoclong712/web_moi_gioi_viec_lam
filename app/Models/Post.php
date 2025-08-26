@@ -9,10 +9,11 @@ use App\Enums\SystemCacheKeyEnum;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Str;
 use NumberFormatter;
+
 
 /**
  * @property int $id
@@ -27,8 +28,8 @@ use NumberFormatter;
  * @property float|null $max_salary
  * @property int $currency_salary
  * @property string|null $requirement
- * @property string|null $start_date
- * @property string|null $end_date
+ * @property \Illuminate\Support\Carbon|null $start_date
+ * @property \Illuminate\Support\Carbon|null $end_date
  * @property int|null $number_applicants
  * @property int $status
  * @property int $is_pinned
@@ -39,6 +40,7 @@ use NumberFormatter;
  * @property-read \App\Models\Company|null $company
  * @property-read \App\Models\File|null $file
  * @property-read mixed $currency_salary_code
+ * @property-read mixed $is_not_open
  * @property-read string|null $location
  * @property-read mixed $remotable_name
  * @property-read string $salary
@@ -48,6 +50,7 @@ use NumberFormatter;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Post approved()
  * @method static \Database\Factories\PostFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Post findSimilarSlugs(string $attribute, array $config, string $slug)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Post indexHomePage($filters)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Post newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Post newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Post query()
@@ -169,14 +172,7 @@ class Post extends Model
     public function getRemotableNameAttribute()
     {
         $key = PostRemotableEnum::getKey($this->remotable);
-        $arr = explode('_', $key);
-        $str = '';
-        foreach($arr as $item) {
-            $str .= ucfirst(strtolower($item));
-            $str .= ' ';
-        }
-        return trim($str);
-
+        return Str::title(str_replace('_', ' ', $key));
     }
 
     public function getLocationAttribute(): ?string
@@ -242,5 +238,46 @@ class Post extends Model
             return true;
         }
         return false;
+    }
+
+    public function scopeIndexHomePage($query, $filters)
+    {
+        return $query
+            ->with([
+                'languages',
+                'company' => function ($q) {
+                    return $q->select([
+                        'id',
+                        'name',
+                        'logo'
+                    ]);
+                }
+            ])
+            ->approved()
+            ->orderByDesc('is_pinned')
+            ->orderByDesc('id')
+            ->when(isset($filters['cities']), function ($q) use ($filters) {
+                return $q->where(function ($q) use ($filters) {
+                    foreach ($filters['cities'] as $searchCity) {
+                        $q->orWhere('city', 'like', '%'.$searchCity.'%');
+                    }
+                    $q->orWhereNull('city');
+                });
+            })
+            ->when(isset($filters['min_salary']), function ($q) use ($filters) {
+                return $q->where(function ($q) use ($filters) {
+                    $q->orWhere('min_salary', '>=', $filters['min_salary']);
+                    $q->orWhereNull('min_salary');
+                });
+            })
+            ->when(isset($filters['max_salary']), function ($q) use ($filters) {
+                return $q->where(function ($q) use ($filters) {
+                    $q->orWhere('max_salary', '<=', $filters['max_salary']);
+                    $q->orWhereNull('max_salary');
+                });
+            })
+            ->when(isset($filters['remotable']), function ($q) use ($filters) {
+                return $q->where('remotable', $filters['remotable']);
+            });
     }
 }

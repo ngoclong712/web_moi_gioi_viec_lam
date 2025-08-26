@@ -34,7 +34,5 @@ class TestController extends Controller
     public function test()
     {
 //        return DB::getSchemaBuilder()->getColumnListing('posts');
-
-        return user();
     }
 }

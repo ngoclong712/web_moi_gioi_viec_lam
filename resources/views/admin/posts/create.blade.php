@@ -74,10 +74,13 @@
                                 <label>Number Of Applicants</label>
                                 <input type="number" name="number_applicants" class="form-control">
                                 <br>
-                                <input type="checkbox" id="remote" name="remotables[remote]" checked data-switch="success">
-                                <label for="remote" data-on-label="Can Remote" data-off-label="No Remote"></label>
-                                <input type="checkbox" id="office" name="remotables[office]" checked data-switch="success">
-                                <label for="office" data-on-label="Office" data-off-label="No Office"></label>
+                                <select name="remotable" class="form-control">
+                                    @foreach($remotables as $key => $value)
+                                        <option value="{{ $value }}">
+                                            {{ __('frontpage.' . strtolower($key)) }}
+                                        </option>
+                                    @endforeach
+                                </select>
                                 <br>
                                 <input type="checkbox" id="can_parttime" name="can_parttime" checked data-switch="info">
                                 <label for="can_parttime" data-on-label="Can Part Time" data-off-label="No Part Time"></label>
@@ -210,19 +213,26 @@
             generateSlug(title);
         }
         function generateSlug(title){
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
             $.ajax({
                 url: '{{ route('api.posts.slug.generate') }}',
                 type: 'POST',
                 dataType: 'json',
+                headers: { 'Accept': 'application/json' },
                 data: { title },
                 success: function(response){
                     $('#slug').val(response.data);
                     $('#slug').trigger('change');
                 },
                 error: function(response){
-
+                    console.log(response);
                 }
             });
+
         }
         async function loadDistrict(parent){
             parent.find(".select-district").empty()

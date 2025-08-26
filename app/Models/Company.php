@@ -22,4 +22,9 @@ class Company extends Model
         "deleted_at"
     ];
     public $timestamps = false;
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
 }

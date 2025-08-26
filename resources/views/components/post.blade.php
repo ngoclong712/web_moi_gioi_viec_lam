@@ -24,7 +24,7 @@
                                 @isset($company->logo)
                                     <img src="{{ $company->logo }}" class="avatar img-raised">
                                 @endisset
-                                <span>{{ $company->name }}</span>
+                                <span>{{ optional($company)->name }}</span>
                             </a>
                         </div>
                         <div>

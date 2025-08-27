@@ -20,6 +20,7 @@
                     <div id="collapseFilter" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="tabFilter">
                         <div class="panel-body">
                             <div class="checkbox">
+                                <label>Remotable</label>
                                 <select class="form-control" name="remotable">
                                     @foreach($filterRemotable as $key => $val)
                                         <option value="{{ $val }}"
@@ -29,6 +30,17 @@
                                         </option>
                                     @endforeach
                                 </select>
+                            </div>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" value="1" data-toggle="checkbox" name="can_parttime"
+                                           @if($searchCanParttime)
+                                               checked
+                                           @endif
+                                    >
+                                    <span class="checkbox-material"><span class="check"></span></span>
+                                    Can Part-time
+                                </label>
                             </div>
                         </div>
                     </div>

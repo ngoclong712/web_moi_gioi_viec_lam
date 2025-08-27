@@ -10,7 +10,7 @@
                             <label for="role">Role</label>
                             <div class="col-5">
                                 <select class="form-control select-filter" name="role" id="role">
-                                    <option selected>All</option>
+                                    <option selected value="">All</option>
                                     @foreach($roles as $key => $value)
                                         <option value="{{ $value }}" @if($selectedRole == (string)$value) selected @endif>
                                             {{ $key }}
@@ -24,7 +24,7 @@
                             <label for="city">City</label>
                             <div class="col-5">
                                 <select class="form-control select-filter" name="city" id="city">
-                                    <option selected>All</option>
+                                    <option selected value="">All</option>
                                     @foreach($cities as $city)
                                         <option @if($selectedCity == $city) selected @endif>
                                             {{ $city }}
@@ -38,7 +38,7 @@
                             <label for="company">Company</label>
                             <div class="col-5">
                                 <select class="form-control select-filter" name="company" id="company">
-                                    <option selected>All</option>
+                                    <option selected value="">All</option>
                                     @foreach($companies as $company)
                                         <option value="{{ $company->id }}"
                                             @if($selectedCompany == $company->id) selected @endif>

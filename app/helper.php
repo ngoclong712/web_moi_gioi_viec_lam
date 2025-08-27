@@ -27,6 +27,9 @@ if(!function_exists('getPostCities')) {
                     }
                     $arr = explode(',', $city);
                     foreach ($arr as $item) {
+                        if(empty($item)) {
+                            continue;
+                        }
                         if (in_array(trim($item), $arrCity)) {
                             continue;
                         }

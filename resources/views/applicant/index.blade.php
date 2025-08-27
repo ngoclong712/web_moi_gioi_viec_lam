@@ -12,7 +12,7 @@
                 @endforeach
             </div>
             <ul class="pagination pagination-info" style="float: right">
-                {{ $posts->links() }}
+                {{ $posts->append(request()->all())->links() }}
             </ul>
         </div>
     </div>

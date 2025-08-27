@@ -19,13 +19,11 @@ class PostController extends Controller
 
     public function index()
     {
-        $data =  $this->model->paginate();
+        $data =  $this->model->latest()->paginate();
         foreach($data as $each){
             $each->currency_salary = $each->currency_salary_code;
             $each->status = $each->status_name;
         }
-
-//        return $this->errorResponse('Import fail');
 
         $arr['data'] = $data->getCollection();
         $arr['pagination'] = $data->linkCollection();

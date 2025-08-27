@@ -43,24 +43,27 @@ class UserController extends Controller
             ->with('company:id,name')
             ->latest();
 
-        if(isset($selectedRole) && $selectedRole !== 'All') {
+        if(!is_null($selectedRole)) {
             $query->where('role', $selectedRole);
         }
-        if(isset($selectedCity) && $selectedCity !== 'All') {
+        if(!is_null($selectedCity)) {
             $query->where('city', $selectedCity);
         }
-        if(isset($selectedCompany) && $selectedCompany !== 'All') {
+        if(!is_null($selectedCompany)) {
             $query->whereHas('company', function ($query) use ($selectedCompany) {
                 return $query->where('id', $selectedCompany);
             });
         }
 
-        $data = $query->paginate(5);
+        $data = $query
+            ->paginate(5)
+            ->appends($request->all());
 
         $roles = UserRoleEnum::asArray();
         $cities = $this->model->clone()
             ->distinct()
             ->limit(10)
+            ->whereNotNull('city')
             ->pluck('city');
         $companies = Company::query()
             ->select('id', 'name')

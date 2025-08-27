@@ -23,6 +23,7 @@ class HomePageController extends Controller
         $minSalary = $request->get('min_salary', $configs['filter_min_salary']);
         $maxSalary = $request->get('max_salary', $configs['filter_max_salary']);
         $remotable = $request->get('remotable');
+        $searchCanParttime = $request->boolean('can_parttime', false);
 
         $filters[] = [];
         if(!empty($searchCities)) {
@@ -37,11 +38,14 @@ class HomePageController extends Controller
         if(!empty($remotable)) {
             $filters['remotable'] = $remotable;
         }
+        if(!empty($searchCanParttime)) {
+            $filters['can_parttime'] = $searchCanParttime;
+        }
 
         $posts = Post::query()
             ->indexHomepage($filters)
-            ->paginate()
-            ->appends(['cities' => $searchCities]);
+            ->paginate();
+//            ->appends(['cities' => $searchCities]);
 
         $arrCity = getAndCachePostCities();
         $filterRemotable = PostRemotableEnum::getRemotableArray();
@@ -55,6 +59,7 @@ class HomePageController extends Controller
             'configs' => $configs,
             'filterRemotable' => $filterRemotable,
             'remotable' => $remotable,
+            'searchCanParttime' => $searchCanParttime,
         ]);
     }
 
@@ -65,8 +70,11 @@ class HomePageController extends Controller
             ->approved()
             ->findOrFail($postId);
 
+        $title = $post->job_title;
+
         return view('applicant.show', [
             'post' => $post,
+            'title' => $title,
         ]);
     }
 }

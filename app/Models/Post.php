@@ -278,6 +278,11 @@ class Post extends Model
             })
             ->when(isset($filters['remotable']), function ($q) use ($filters) {
                 return $q->where('remotable', $filters['remotable']);
-            });
+            })
+            ->when(isset($filters['can_parttime']), function ($q) use ($filters) {
+                return $q->where('can_parttime', $filters['can_parttime']);
+            })
+            ->orderByDesc('is_pinned')
+            ->orderByDesc('id');
     }
 }
